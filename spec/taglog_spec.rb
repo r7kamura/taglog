@@ -18,7 +18,7 @@ describe Taglog do
   end
 
   let(:formatter) do
-    proc {|_, _, _, message| message }
+    proc {|_, _, program_name, message| "#{program_name}: #{message}" }
   end
 
   let(:io) do
@@ -44,9 +44,19 @@ describe Taglog do
     end
 
     describe "#info" do
-      it "is wrapped by tag" do
+      it "is wrapped by tag for an argument" do
         klass.new.logger.info("message")
-        result.should == "[tag] message"
+        result.should == ": [tag] message"
+      end
+
+      it "is wrapped by tag for return value of block" do
+        klass.new.logger.info { "block" + "message" }
+        result.should == ": [tag] blockmessage"
+      end
+
+      it "is wrapped by tag for an argument with return value of block" do
+        klass.new.logger.info("program_name") { "block" + "message" }
+        result.should == "program_name: [tag] blockmessage"
       end
     end
 

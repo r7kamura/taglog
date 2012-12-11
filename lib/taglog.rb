@@ -29,13 +29,19 @@ class Taglog < Module
     end
 
     LEVELS.each do |level|
-      define_method(level) do |message|
-        delegate(level, tagged(message))
-      end
+      class_eval %Q{
+        def #{level}(arg=nil, &block)
+          if block_given?
+            delegate(:#{level}, arg) { tagged(block.call) }
+          else
+            delegate(:#{level}, tagged(arg))
+          end
+        end
+      }
     end
 
-    def method_missing(name, *args)
-      delegate(name, *args)
+    def method_missing(name, *args, &block)
+      delegate(name, *args, &block)
     end
 
     attr_reader :context, :tag
@@ -47,8 +53,8 @@ class Taglog < Module
       "[#{tag}] #{message}"
     end
 
-    def delegate(method_name, *args)
-      logger.send(method_name, *args)
+    def delegate(method_name, *args, &block)
+      logger.send(method_name, *args, &block)
     end
 
     def logger
