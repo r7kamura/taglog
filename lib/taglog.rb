@@ -38,9 +38,10 @@ class Taglog < Module
       delegate(name, *args)
     end
 
-    private
-
     attr_reader :context, :tag
+    private :context, :tag
+
+    private
 
     def tagged(message)
       "[#{tag}] #{message}"
